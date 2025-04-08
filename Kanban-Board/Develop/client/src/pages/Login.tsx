@@ -27,33 +27,28 @@ const Login = () => {
     setError('');
   
     try {
-      const { token, user } = await login(loginData);
+      const data = await login(loginData);
       
-      if (!token) {
-        throw new Error('No authentication token received');
+      if (!data?.token) {
+        throw new Error('Authentication token missing');
       }
-  
-      AuthService.login(token);
-      navigate('/'); // Redirect after successful login
       
+      AuthService.login(data.token);
+      navigate('/board'); // Redirect to your board page
     } catch (err) {
       let errorMessage = 'Login failed. Please try again.';
       
       if (err instanceof Error) {
-        // Improved error messages
         if (err.message.includes('401')) {
           errorMessage = 'Invalid username or password';
-        } else if (err.message.includes('500')) {
-          errorMessage = 'Server error. Please try again later.';
-        } else if (err.message.includes('Failed to fetch')) {
-          errorMessage = 'Cannot connect to the server';
+        } else if (err.message.includes('Network')) {
+          errorMessage = 'Cannot connect to server';
         } else {
           errorMessage = err.message;
         }
       }
       
       setError(errorMessage);
-      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
